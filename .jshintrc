@@ -19,7 +19,10 @@
         "require": false,
         "exports": false,
         "global": false,
+        "module": true,
 
+        "jasmine": true,
+        "beforeEach": true,
         "describe": true,
         "it": true,
         "expect": true,
