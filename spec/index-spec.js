@@ -78,6 +78,81 @@ describe("gasp", function (){
             });
         });
     });
+    describe("using gasped function while in progress", function () {
+        var gasped, task;
+        beforeEach(function () {
+            task = jasmine.createSpy("task").andCallFake(function () {
+                return Q(true);
+            });
+            gasped = gasp(task, 50);
+        });
+        it("should result in two invocations of the task", function () {
+            gasped.delegate = {
+                willGasp: function(gasped) {
+                    gasped(456);
+                }
+            };
+            return gasped(123)
+            .then(function () {
+                expect(task).toHaveBeenCalledWith(123);
+            });
+        });
+    });
+
+    describe("delegate", function () {
+        var gasped, task, delegate;
+        beforeEach(function () {
+            delegate = jasmine.createSpyObj('delegate', ['willGasp','willCollideWithPreviousGasp']);
+            task = jasmine.createSpy("task");
+            gasped = gasp(task, 50);
+            gasped.delegate = delegate;
+        });
+        it("should result in two invocations of the task", function () {
+            return gasped(123)
+            .then(function () {
+                expect(delegate.willGasp).toHaveBeenCalledWith(gasped,[123]);
+            });
+        });
+        describe("collisions", function () {
+            var deferred, slowTask;
+            beforeEach(function () {
+                deferred = Q.defer();
+                slowTask = jasmine.createSpy("task").andCallFake(function () {
+                    return deferred.promise;
+                });
+                //only resolve after willGasp so that they are guaranteed to collide
+                gasped = gasp(slowTask, 5);
+                gasped.delegate = delegate;
+
+            });
+            it("should call willCollideWithPreviousGasp", function () {
+                var doneOnce = false, secondGasp = Q.defer();
+
+                gasped(123);
+
+                delegate.willGasp.andCallFake(function () {
+                    if(!doneOnce) {
+                        setTimeout(function () {
+                            gasped(456)
+                            .then(function () {
+                                return secondGasp.resolve();
+                            });
+                        },10);
+                        setTimeout(function () {
+                            deferred.resolve(true);
+                        },30);
+                        doneOnce = true;
+                    }
+                });
+
+                return secondGasp.promise
+                .then(function () {
+                    expect(delegate.willCollideWithPreviousGasp).toHaveBeenCalled();
+                });
+
+            });
+        });
+    });
 
 });
 
