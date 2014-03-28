@@ -3,6 +3,7 @@
   "description": "Promise based throttling",
   "author": "François Frisch francoisfrisch@gmail.com",
   "version": "0.0.1",
+  "main": "index",
   "dependencies": {
     "q": "^1.0.0"
   },
