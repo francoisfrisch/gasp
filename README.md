@@ -1,4 +1,4 @@
-Promise based throttling
+Promise compatible throttling
 
 Usage:
 
