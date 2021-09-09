@@ -7,6 +7,10 @@
   "dependencies": {
     "q": "^1.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/francoisfrisch/gasp.git"
+  },
   "devDependencies": {
     "jshint": "~2.3.0",
     "jasmine-node": "~1.11.0",
